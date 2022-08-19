@@ -1,66 +1,111 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import "./index.css";
+
+function getRandomArbitrary(min: number, max: number) {
+  return Math.round(Math.random() * (max - min) + min);
+}
+
+const wordsArray = ["one", "two", "three"];
 
 function App() {
-  let wordsArray = [
-    { id: 1, question: "why", answer: "otvet" },
-    { id: 2, question: "what", answer: "takiedela" },
-  ];
-
-  const [gameMistakes, setGameMistakes] = useState(0);
-  const [randomWord, setRandomWord] = useState("");
-  const [gameIsStarted, setGameIsStarted] = useState(false);
+  const [gameLifes, setGameLifes] = useState(5);
+  const [randomWordArray, setRandomWordArray] = useState<string[]>([]);
+  const [staticRandomWordArray, setStaticRandomWordArray] = useState<string[]>([])
+  const [randomWordArrayWithSpaces, setRandomWordArrayWithSpaces] = useState<
+    string[]
+  >([]);
   const [currentLetter, setCurrentLetter] = useState("");
 
   useEffect(() => {
-    if (gameIsStarted) {
-      const gameElement = getRandomWord();
-      const gameWord = gameElement.answer
-      console.log(gameWord)
-      setRandomWord(gameWord);
-      console.log(randomWord);
+    console.log(randomWordArray);
+    console.log(randomWordArrayWithSpaces);
+  }, [randomWordArray]);
+
+  useEffect(() => {
+    if (randomWordArray !== []) {
+      if (randomWordArray.includes(currentLetter)) {
+        const currentIndex = randomWordArray.indexOf(currentLetter);
+        randomWordArrayWithSpaces[currentIndex] = currentLetter;
+        setRandomWordArray(
+          randomWordArray.filter((item, index) => {
+            if (index !== currentIndex) {
+              return item;
+            }
+          })
+        );
+
+        // setRandomWordArray(randomWordArray.splice(currentIndex, 1));
+      } else {
+        setGameLifes(gameLifes - 1);
+        console.log(gameLifes);
+      }
+      if (gameLifes !== 0 && randomWordArray.length === 1) {
+        console.log("победа нахой");
+        return;
+      } else if (gameLifes === 0) {
+        console.log("проебал :с");
+        return;
+      }
     } else {
-      setGameMistakes(0);
-      setRandomWord("");
-      setGameIsStarted(false);
+      return;
     }
-  }, [gameIsStarted]);
-
-  function getRandomArbitrary(min: number, max: number) {
-    return Math.round(Math.random() * (max - min) + min);
-  }
-
-  function getRandomWord() {
-    let randomId = getRandomArbitrary(1, wordsArray.length);
-    let word = wordsArray.filter((word) => {
-      return word.id === randomId;
-    });
-    return word[0];
-  }
-
-  function changeLetter(event: any) {
-    event.preventDefault();
-    console.log(event.target.letter.value);
-    setCurrentLetter(() => event.target.letter.value);
-    console.log(currentLetter);
-  }
+  }, [currentLetter]);
 
   return (
     <div>
-      <form onSubmit={(event) => changeLetter(event)}>
-        <input
-          style={{ width: "100px" }}
-          name="letter"
-          maxLength={1}
-          type="text"
-         // onChange={}
-        />
-        <input type="submit" value={"Отправить"} />
-      </form>
-      <button onClick={() => setGameIsStarted((current: boolean) => !current)}>
-        Start
+      <div
+        onClick={(e) => {
+          setCurrentLetter(e.target.textContent);
+        }}
+        style={{
+          maxWidth: "260px",
+          display: randomWordArray.length !== 0 ? "block" : "none",
+        }}
+        className="alphavit"
+      >
+        <button>a</button>
+        <button>b</button>
+        <button>c</button>
+        <button>d</button>
+        <button>e</button>
+        <button>f</button>
+        <button>g</button>
+        <button>h</button>
+        <button>i</button>
+        <button>j</button>
+        <button>k</button>
+        <button>l</button>
+        <button>m</button>
+        <button>n</button>
+        <button>o</button>
+        <button>p</button>
+        <button>q</button>
+        <button>r</button>
+        <button>s</button>
+        <button>t</button>
+        <button>u</button>
+        <button>v</button>
+        <button>w</button>
+        <button>x</button>
+        <button>y</button>
+        <button>z</button>
+      </div>
+      <button
+        onClick={() => {
+          let randomIndex = getRandomArbitrary(0, 2);
+          let wordArray = wordsArray[randomIndex].split("");
+          setRandomWordArray(wordArray);
+          setStaticRandomWordArray(wordArray);
+          setRandomWordArrayWithSpaces(Array(wordArray.length).fill("_"));
+        }}
+      >
+        {randomWordArray.length === 0 ? "start" : "stop"}
       </button>
     </div>
   );
 }
 
 export default App;
+
+// изменение стейта стринг
+// как добавлять след. букву и прогонять заново код относительно неё
