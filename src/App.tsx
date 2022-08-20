@@ -5,46 +5,84 @@ function getRandomArbitrary(min: number, max: number) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
+function getAllIndexes(arr: string[], val: string) {
+  var indexes = [],
+    i = -1;
+  while ((i = arr.indexOf(val, i + 1)) != -1) {
+    indexes.push(i);
+  }
+  return indexes;
+}
+
 const wordsArray = ["one", "two", "three"];
 
 function App() {
   const [gameLifes, setGameLifes] = useState(5);
   const [randomWordArray, setRandomWordArray] = useState<string[]>([]);
-  const [staticRandomWordArray, setStaticRandomWordArray] = useState<string[]>([])
+  const [staticRandomWordArray, setStaticRandomWordArray] = useState<string[]>(
+    []
+  );
   const [randomWordArrayWithSpaces, setRandomWordArrayWithSpaces] = useState<
     string[]
   >([]);
   const [currentLetter, setCurrentLetter] = useState("");
 
   useEffect(() => {
-    console.log(randomWordArray);
-    console.log(randomWordArrayWithSpaces);
+    if (
+      gameLifes !== 0 &&
+      randomWordArray.length === 0 &&
+      staticRandomWordArray.length !== 0
+    ) {
+      console.log("ПАБЕДА")
+      setRandomWordArray([]);
+      setStaticRandomWordArray([]);
+      setCurrentLetter("");
+      setGameLifes(5);
+      return;
+    }
   }, [randomWordArray]);
+
+  useEffect(() => {
+    if (gameLifes === 0) {
+      console.log("праеграл :с");
+      setRandomWordArray([]);
+      setStaticRandomWordArray([]);
+      setCurrentLetter("");
+      return;
+    }
+  }, [gameLifes]);
 
   useEffect(() => {
     if (randomWordArray !== []) {
       if (randomWordArray.includes(currentLetter)) {
-        const currentIndex = randomWordArray.indexOf(currentLetter);
-        randomWordArrayWithSpaces[currentIndex] = currentLetter;
+        const currentIndexes = getAllIndexes(
+          staticRandomWordArray,
+          currentLetter
+        );
+        const newArrayWithSpaces = randomWordArrayWithSpaces.map(
+          (item, index) => {
+            if (currentIndexes.includes(index)) {
+              return currentLetter;
+            } else if (item === "_") {
+              return "_";
+            }
+            return item;
+          }
+        );
+        setRandomWordArrayWithSpaces(newArrayWithSpaces);
+
         setRandomWordArray(
-          randomWordArray.filter((item, index) => {
-            if (index !== currentIndex) {
+          randomWordArray.filter((item) => {
+            if (item !== currentLetter) {
               return item;
             }
           })
         );
-
-        // setRandomWordArray(randomWordArray.splice(currentIndex, 1));
-      } else {
-        setGameLifes(gameLifes - 1);
-        console.log(gameLifes);
-      }
-      if (gameLifes !== 0 && randomWordArray.length === 1) {
-        console.log("победа нахой");
-        return;
-      } else if (gameLifes === 0) {
-        console.log("проебал :с");
-        return;
+      } else if (
+        !randomWordArray.includes(currentLetter) &&
+        currentLetter !== ""
+      ) {
+        setGameLifes((gameLifes) => gameLifes - 1);
       }
     } else {
       return;
@@ -97,15 +135,26 @@ function App() {
           setRandomWordArray(wordArray);
           setStaticRandomWordArray(wordArray);
           setRandomWordArrayWithSpaces(Array(wordArray.length).fill("_"));
+          setGameLifes(5);
         }}
       >
         {randomWordArray.length === 0 ? "start" : "stop"}
       </button>
+      <div
+        style={{
+          display: randomWordArray.length !== 0 ? "flex" : "none",
+          gap: '10px'
+        }}
+      >
+        lifes:{gameLifes}
+        {randomWordArrayWithSpaces.map((item, index)=>{return <div key={index}>{item}</div>})}
+      </div>
+      <div style={{display: gameLifes !== 0 &&
+      randomWordArray.length === 0 && staticRandomWordArray.length !== 0 ? 'block':'none'}}>Победа</div>
     </div>
   );
 }
 
 export default App;
 
-// изменение стейта стринг
-// как добавлять след. букву и прогонять заново код относительно неё
+// Как-то надо вывести результат
